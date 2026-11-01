@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * Reads integers from input.txt line by line, sums each line,
- * and writes the result (or an error message) to output.txt.
+ * Reads integers from input.txt line by line, reports invalid lines,
+ * and writes the total sum of all valid integers to output.txt.
  *
  * @author Sarah OUAMOU
  * @version 1.0
@@ -26,55 +26,41 @@ public final class FileIO {
      */
     public static void main(final String[] args) {
         try {
-            // Locate the input file in the program's working directory.
+            // Locate the input file and open the output writer.
             File inputFile = new File("input.txt");
-
-            if (!inputFile.exists()) {
-                // Create the input file with sample values when it is missing.
-                FileWriter starter = new FileWriter(inputFile);
-                starter.write("1\n2\n3\n4\n-3\n2\n0\n");
-                starter.close();
-            }
-
-            // Open the input file and prepare the output file for new results.
-            Scanner input = new Scanner(inputFile);
             FileWriter output = new FileWriter("output.txt");
+
+            // Open the input file for reading.
+            Scanner input = new Scanner(inputFile);
+
+            // Track total sum across all lines in the file.
+            int totalSum = 0;
 
             while (input.hasNextLine()) {
                 // Read one line and remove whitespace from both ends.
                 String line = input.nextLine().trim();
 
                 if (line.isEmpty()) {
-                    // Report empty lines without attempting to parse them.
-                    output.write("This line is empty :c \n");
+                    // Skip blank lines because they contain no numbers to add.
                     continue;
                 }
 
                 // Separate the line into individual values for validation.
                 String[] pieces = line.split(" ");
-                int sum = 0;
-                String invalidValue = null;
 
                 for (String piece : pieces) {
                     try {
-                        // Convert each value to an integer before adding it.
-                        sum += Integer.parseInt(piece);
+                        // Add valid integers to the running total.
+                        totalSum += Integer.parseInt(piece);
                     } catch (NumberFormatException error) {
-                        // Remember the first value that cannot be parsed.
-                        invalidValue = piece;
-                        break;
+                        // Immediately report invalid inputs to output.txt.
+                        output.write(piece + " is not a valid int\n");
                     }
                 }
-
-                if (invalidValue == null) {
-                    // Write the sum when every value on the line is valid.
-                    output.write(sum + "\n");
-                } else {
-                    // Explain which value caused the line to be rejected.
-                    output.write("Error: \"" + invalidValue
-                        + "\" is not a valid integer\n");
-                }
             }
+
+            // Write the overall sum at the end of the file.
+            output.write(totalSum + "\n");
 
             // Close both streams after all input lines have been processed.
             input.close();
